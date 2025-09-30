@@ -17,11 +17,11 @@ func init() {
 	carapace.Gen(switchCmd).Standalone()
 
 	switchCmd.Flags().String("conflict", "", "conflict style (merge or diff3)")
-	switchCmd.Flags().StringP("create", "c", "", "create and switch to a new branch")
+	switchCmd.Flags().BoolP("create", "c", false, "create and switch to a new branch")
 	switchCmd.Flags().BoolP("detach", "d", false, "detach HEAD at named commit")
 	switchCmd.Flags().Bool("discard-changes", false, "throw away local modifications")
 	switchCmd.Flags().BoolP("force", "f", false, "force checkout (throw away local modifications)")
-	switchCmd.Flags().StringP("force-create", "C", "", "create/reset and switch to a branch")
+	switchCmd.Flags().BoolP("force-create", "C", false, "create/reset and switch to a branch")
 	switchCmd.Flags().Bool("guess", false, "second guess 'git switch <no-such-branch>'")
 	switchCmd.Flags().Bool("ignore-other-worktrees", false, "do not check if another worktree is holding the given ref")
 	switchCmd.Flags().BoolP("merge", "m", false, "perform a 3-way merge with the new branch")
@@ -39,10 +39,8 @@ func init() {
 	switchCmd.Flag("recurse-submodules").NoOptDefVal = " "
 
 	carapace.Gen(switchCmd).FlagCompletion(carapace.ActionMap{
-		"conflict":     carapace.ActionValues("merge", "diff3"),
-		"create":       git.ActionRefs(git.RefOption{LocalBranches: true}),
-		"force-create": git.ActionRefs(git.RefOption{LocalBranches: true}),
-		"orphan":       git.ActionRefs(git.RefOption{LocalBranches: true}),
+		"conflict": carapace.ActionValues("merge", "diff3"),
+		"orphan":   git.ActionRefs(git.RefOption{LocalBranches: true}),
 	})
 
 	carapace.Gen(switchCmd).PositionalCompletion(
