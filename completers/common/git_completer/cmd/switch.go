@@ -43,11 +43,34 @@ func init() {
 		"orphan":   git.ActionRefs(git.RefOption{LocalBranches: true}),
 	})
 
-	carapace.Gen(switchCmd).PositionalCompletion(
-		carapace.Batch(
-			git.ActionRemoteBranchNames(""),
-			git.ActionRefs(git.RefOption{LocalBranches: true}),
-		).ToA(),
+	carapace.Gen(switchCmd).PositionalAnyCompletion(
+		carapace.ActionCallback(func(c carapace.Context) carapace.Action {
+			// from `man git-switch`:
+			// git switch [<options>] (-c|-C) <new-branch> [<start-point>]
+			if switchCmd.Flag("create").Changed || switchCmd.Flag("force-create").Changed {
+				switch len(c.Args) {
+				// no completions for <new-branch>
+				case 0:
+					return carapace.ActionValues()
+
+				// complete local and remote branches for <start-point>
+				case 1:
+					return carapace.Batch(
+						git.ActionRemoteBranches(""),
+						git.ActionLocalBranches(),
+					).ToA()
+				}
+			}
+
+			if len(c.Args) == 0 {
+				return carapace.Batch(
+					git.ActionRemoteBranchNames(""),
+					git.ActionRefs(git.RefOption{LocalBranches: true}),
+				).ToA()
+			}
+
+			return carapace.ActionValues()
+		}),
 	)
 
 	carapace.Gen(switchCmd).DashAnyCompletion(
